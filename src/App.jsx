@@ -1,9 +1,9 @@
 import "./App.css";
-import Test from "./components/TestTailwind";
+import HandGesture from "./components/HandGesture";
 
 function App() {
     return (
-        <Test />
+        <HandGesture />
     );
 }
 
