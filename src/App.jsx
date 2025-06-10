@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Hands, HAND_CONNECTIONS } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
+import './App.css'
 
 function App() {
     const [gestureText, setGestureText] = useState("OFF");
@@ -40,11 +41,32 @@ function App() {
 
             // Check if all fingers are open or closed
             const isOpen = areAllFingersOpen(landmarks);
-            setGestureText(isOpen ? "ON" : "OFF");
+            const newGestureText = isOpen ? "ON" : "OFF";
+            setGestureText(newGestureText);
+
+            // Send the gesture data to the ESP32 server
+            sendGestureToESP32(newGestureText);
         }
 
         canvasCtx.restore();
     }, []);
+
+    const sendGestureToESP32 = (gestureState) => {
+        fetch("http://192.168.4.1/led", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `state=${gestureState}`,
+        })
+            .then((response) => response.text())
+            .then((data) => {
+                console.log("LED state:", data);
+            })
+            .catch((error) => {
+                console.error("Error sending data to ESP32:", error);
+            });
+    };
 
     // Initialize MediaPipe Hands
     useEffect(() => {
@@ -119,15 +141,6 @@ function App() {
     };
 
     const areAllFingersOpen = (landmarks) => {
-        // MediaPipe hand landmarks:
-        // - Wrist: 0
-        // - Thumb: 1 (CMC) -> 2 (MCP) -> 3 (IP) -> 4 (TIP)
-        // - Index: 5 (MCP) -> 6 (PIP) -> 7 (DIP) -> 8 (TIP)
-        // - Middle: 9 (MCP) -> 10 (PIP) -> 11 (DIP) -> 12 (TIP)
-        // - Ring: 13 (MCP) -> 14 (PIP) -> 15 (DIP) -> 16 (TIP)
-        // - Pinky: 17 (MCP) -> 18 (PIP) -> 19 (DIP) -> 20 (TIP)
-
-        // Calculate distance between points using 3D euclidean distance
         const dist = (p1, p2) => {
             return Math.sqrt(
                 Math.pow(p1.x - p2.x, 2) +
@@ -136,41 +149,25 @@ function App() {
             );
         };
 
-        // Compare distances to determine if fingers are extended
-        // When fingers are extended, this ratio will be higher
-
-        // For thumb
         const thumbRatio =
             dist(landmarks[4], landmarks[0]) / dist(landmarks[2], landmarks[0]);
-
-        // For other fingers
         const indexRatio =
             dist(landmarks[8], landmarks[0]) / dist(landmarks[5], landmarks[0]);
         const middleRatio =
-            dist(landmarks[12], landmarks[0]) /
-            dist(landmarks[9], landmarks[0]);
+            dist(landmarks[12], landmarks[0]) / dist(landmarks[9], landmarks[0]);
         const ringRatio =
-            dist(landmarks[16], landmarks[0]) /
-            dist(landmarks[13], landmarks[0]);
+            dist(landmarks[16], landmarks[0]) / dist(landmarks[13], landmarks[0]);
         const pinkyRatio =
-            dist(landmarks[20], landmarks[0]) /
-            dist(landmarks[17], landmarks[0]);
+            dist(landmarks[20], landmarks[0]) / dist(landmarks[17], landmarks[0]);
 
-        // Threshold values to determine if fingers are open
         const threshold = 1.7;
 
-        const thumbIsOpen = thumbRatio > threshold;
-        const indexIsOpen = indexRatio > threshold;
-        const middleIsOpen = middleRatio > threshold;
-        const ringIsOpen = ringRatio > threshold;
-        const pinkyIsOpen = pinkyRatio > threshold;
-
         return (
-            thumbIsOpen &&
-            indexIsOpen &&
-            middleIsOpen &&
-            ringIsOpen &&
-            pinkyIsOpen
+            thumbRatio > threshold &&
+            indexRatio > threshold &&
+            middleRatio > threshold &&
+            ringRatio > threshold &&
+            pinkyRatio > threshold
         );
     };
 
