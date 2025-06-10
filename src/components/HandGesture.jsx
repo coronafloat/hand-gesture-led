@@ -15,7 +15,7 @@ function HandGesture() {
         if (!canvasRef.current) return;
 
         const canvasCtx = canvasRef.current.getContext("2d");
-        // Rest of your onResults function...
+        // Rest of onResults function...
         const { width, height } = canvasRef.current;
 
         canvasCtx.save();
