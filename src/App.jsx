@@ -141,6 +141,15 @@ function App() {
     };
 
     const areAllFingersOpen = (landmarks) => {
+        // MediaPipe hand landmarks:Add commentMore actions
+        // - Wrist: 0
+        // - Thumb: 1 (CMC) -> 2 (MCP) -> 3 (IP) -> 4 (TIP)
+        // - Index: 5 (MCP) -> 6 (PIP) -> 7 (DIP) -> 8 (TIP)
+        // - Middle: 9 (MCP) -> 10 (PIP) -> 11 (DIP) -> 12 (TIP)
+        // - Ring: 13 (MCP) -> 14 (PIP) -> 15 (DIP) -> 16 (TIP)
+        // - Pinky: 17 (MCP) -> 18 (PIP) -> 19 (DIP) -> 20 (TIP)
+
+        // Calculate distance between points using 3D euclidean distance
         const dist = (p1, p2) => {
             return Math.sqrt(
                 Math.pow(p1.x - p2.x, 2) +
@@ -148,6 +157,10 @@ function App() {
                     Math.pow(p1.z - p2.z, 2)
             );
         };
+
+        // compared to knuckles and wristAdd commentMore actions
+        // When fingers are extended, this ratio will be higher
+        // Hitung jarak ujung jari ke pergelangan tangan dibagi jarak pangkal jari ke pergelangan tangan
 
         const thumbRatio =
             dist(landmarks[4], landmarks[0]) / dist(landmarks[2], landmarks[0]);
