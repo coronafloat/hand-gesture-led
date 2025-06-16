@@ -160,7 +160,7 @@ function App() {
         const pinkyRatio =
             dist(landmarks[20], landmarks[0]) / dist(landmarks[17], landmarks[0]);
 
-        const threshold = 1.7;
+        const threshold = 1.5;
 
         return (
             thumbRatio > threshold &&
