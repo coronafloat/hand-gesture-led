@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Hands, HAND_CONNECTIONS } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
-import './App.css'
+import './App.css';
 
 function App() {
     const [gestureText, setGestureText] = useState("OFF");
@@ -74,7 +74,8 @@ function App() {
             // Initialize MediaPipe Hands
             handsRef.current = new Hands({
                 locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    return `/mediapipe/${file}`;
+                    // return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
                 },
             });
 
